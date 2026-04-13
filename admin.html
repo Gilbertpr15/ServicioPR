@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ServicioPR — Panel Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sun: #F5A623;
+    --sea: #0A6EBD;
+    --sea-dark: #084E8A;
+    --green: #2ECC71;
+    --red: #E74C3C;
+    --orange: #F39C12;
+    --bg: #F0F4F8;
+    --card: #FFFFFF;
+    --text: #1A1A2E;
+    --muted: #6B6B8A;
+    --border: #E2DDD5;
+    --radius: 14px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── LOGIN ── */
+  .login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--sea-dark), var(--sea));
+    padding: 24px;
+  }
+  .login-box {
+    background: #fff;
+    border-radius: 24px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+  }
+  .login-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.8rem;
+    color: var(--sea-dark);
+    margin-bottom: 4px;
+  }
+  .login-logo span { color: var(--sun); }
+  .login-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+  .login-label { font-size: 0.82rem; font-weight: 500; color: var(--text); margin-bottom: 6px; display: block; }
+  .login-input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+  .login-input:focus { border-color: var(--sea); }
+  .login-btn {
+    width: 100%;
+    background: var(--sea-dark);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 8px;
+  }
+  .login-btn:hover { background: var(--sea); }
+  .login-error {
+    background: #fdecea;
+    color: var(--red);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* ── ADMIN LAYOUT ── */
+  .admin-screen { display: none; min-height: 100vh; }
+
+  .admin-nav {
+    background: var(--sea-dark);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  .admin-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; color: #fff; }
+  .admin-logo span { color: var(--sun); }
+  .admin-logo small { font-size: 0.7rem; background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 20px; margin-left: 8px; font-weight: 400; }
+  .logout-btn {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .logout-btn:hover { background: rgba(255,255,255,0.22); }
+
+  .admin-body { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+
+  /* ── STATS CARDS ── */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .stat-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--sea);
+  }
+  .stat-card.pending { border-left-color: var(--orange); }
+  .stat-card.active { border-left-color: var(--green); }
+  .stat-card.featured { border-left-color: var(--sun); }
+  .stat-card-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2rem; color: var(--text); }
+  .stat-card-label { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 4px; background: #fff; border-radius: 12px; padding: 4px; box-shadow: var(--shadow); margin-bottom: 24px; width: fit-content; }
+  .tab {
+    padding: 8px 20px;
+    border-radius: 9px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tab.active { background: var(--sea-dark); color: #fff; }
+  .tab-badge {
+    background: var(--red);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+  }
+  .tab.active .tab-badge { background: rgba(255,255,255,0.25); }
+
+  /* ── TABLE ── */
+  .table-wrap { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .table-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .table-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
+  .table-search {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    width: 220px;
+    transition: border-color 0.2s;
+  }
+  .table-search:focus { border-color: var(--sea); }
+
+  .provider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    flex-wrap: wrap;
+  }
+  .provider-row:last-child { border-bottom: none; }
+  .provider-row:hover { background: #f8f9fc; }
+
+  .row-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sea-dark), var(--sea));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .row-info { flex: 1; min-width: 150px; }
+  .row-name { font-weight: 600; font-size: 0.92rem; }
+  .row-meta { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+  .row-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .badge-cat { background: #EEF6FF; color: var(--sea); }
+  .badge-pueblo { background: #F0FFF4; color: #276749; }
+  .badge-pending { background: #FFF3E0; color: #E65100; }
+  .badge-active { background: #E8F5E9; color: #2E7D32; }
+  .badge-featured { background: #FFF8E1; color: #F57F17; }
+
+  .row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .action-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-approve { background: var(--green); color: #fff; }
+  .btn-approve:hover { background: #27ae60; }
+  .btn-reject { background: #fdecea; color: var(--red); }
+  .btn-reject:hover { background: var(--red); color: #fff; }
+  .btn-feature { background: #FFF8E1; color: var(--orange); }
+  .btn-feature:hover { background: var(--orange); color: #fff; }
+  .btn-unfeature { background: var(--sun); color: var(--text); }
+  .btn-unfeature:hover { background: #e09415; }
+  .btn-delete { background: #fdecea; color: var(--red); }
+  .btn-delete:hover { background: var(--red); color: #fff; }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1rem; color: var(--text); margin-bottom: 4px; }
+
+  /* Loading */
+  .loading { text-align: center; padding: 40px; }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--sea); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1A1A2E; color: #fff; padding: 12px 24px; border-radius: 30px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.88rem; z-index: 999; transition: transform 0.3s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2); pointer-events: none; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--green); }
+  .toast.error { background: var(--red); }
+
+  /* Confirm dialog */
+  .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+  .confirm-overlay.open { display: flex; }
+  .confirm-box { background: #fff; border-radius: 20px; padding: 32px; max-width: 360px; width: 100%; text-align: center; animation: pop 0.2s ease; }
+  @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .confirm-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .confirm-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; margin-bottom: 8px; }
+  .confirm-msg { color: var(--muted); font-size: 0.88rem; margin-bottom: 24px; }
+  .confirm-btns { display: flex; gap: 10px; }
+  .confirm-yes { flex: 1; background: var(--red); color: #fff; border: none; border-radius: 10px; padding: 12px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; }
+  .confirm-no { flex: 1; background: var(--bg); color: var(--text); border: none; border-radius: 10px; padding: 12px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; }
+
+  @media (max-width: 600px) {
+    .provider-row { gap: 10px; }
+    .row-actions { width: 100%; justify-content: flex-end; }
+    .tabs { width: 100%; }
+    .tab { flex: 1; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Servicio<span>PR</span></div>
+    <div class="login-sub">Panel de Administración</div>
+    <label class="login-label">Usuario</label>
+    <input class="login-input" id="login-user" type="text" placeholder="admin" onkeyup="if(event.key==='Enter')doLogin()">
+    <label class="login-label">Contraseña</label>
+    <input class="login-input" id="login-pass" type="password" placeholder="••••••••" onkeyup="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Entrar al Panel</button>
+    <div class="login-error" id="login-error">Usuario o contraseña incorrectos</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-screen" id="admin-screen">
+  <nav class="admin-nav">
+    <div class="admin-logo">Servicio<span>PR</span> <small>Admin</small></div>
+    <button class="logout-btn" onclick="doLogout()">Cerrar sesión</button>
+  </nav>
+
+  <div class="admin-body">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card pending">
+        <div class="stat-card-num" id="stat-pending">—</div>
+        <div class="stat-card-label">⏳ Pendientes</div>
+      </div>
+      <div class="stat-card active">
+        <div class="stat-card-num" id="stat-active">—</div>
+        <div class="stat-card-label">✅ Activos</div>
+      </div>
+      <div class="stat-card featured">
+        <div class="stat-card-num" id="stat-featured">—</div>
+        <div class="stat-card-label">⭐ Destacados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-num" id="stat-total">—</div>
+        <div class="stat-card-label">📋 Total</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" id="tab-pending" onclick="switchTab('pending')">
+        ⏳ Pendientes <span class="tab-badge" id="badge-pending">0</span>
+      </button>
+      <button class="tab" id="tab-active" onclick="switchTab('active')">
+        ✅ Activos
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-head">
+        <div class="table-title" id="table-title">Proveedores pendientes</div>
+        <input class="table-search" id="table-search" type="text" placeholder="🔍 Buscar..." oninput="renderTable()">
+      </div>
+      <div id="table-body">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">¿Eliminar proveedor?</div>
+    <div class="confirm-msg" id="confirm-msg">Esta acción no se puede deshacer.</div>
+    <div class="confirm-btns">
+      <button class="confirm-no" onclick="closeConfirm()">Cancelar</button>
+      <button class="confirm-yes" id="confirm-yes-btn">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ──
+const SUPABASE_URL = 'https://ycxhniapuozdbxuhuolk.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InljeGhuaWFwdW96ZGJ4dWh1b2xrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMTAzNTYsImV4cCI6MjA5MTU4NjM1Nn0.I3wZhQG90o353_NLKuPzdcd3cDirdv-zyih9aS-4SaI';
+
+// ── CHANGE THESE CREDENTIALS ──
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'ServicioPR2024!';
+
+const HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`
+};
+
+const CAT_ICONS = {
+  plomeria:'🔧', electrica:'⚡', carpinteria:'🪚', jardineria:'🌿',
+  ac:'❄️', electro:'🍳', pintura:'🖌️', techo:'🏠',
+  carros:'🚗', limpieza:'🧹', mudanzas:'📦', soldadura:'🔩',
+  seguridad:'🔐', otros:'🛠️'
+};
+
+let allProviders = [];
+let currentTab = 'pending';
+let confirmCallback = null;
+
+// ── LOGIN ──
+function doLogin() {
+  const user = document.getElementById('login-user').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const err  = document.getElementById('login-error');
+
+  if (user === ADMIN_USER && pass === ADMIN_PASS) {
+    sessionStorage.setItem('spr_admin', '1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'block';
+    loadProviders();
+  } else {
+    err.style.display = 'block';
+    setTimeout(() => err.style.display = 'none', 3000);
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('spr_admin');
+  document.getElementById('admin-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-pass').value = '';
+}
+
+// ── DATA ──
+async function loadProviders() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/proveedores?order=created_at.desc`,
+      { headers: HEADERS }
+    );
+    allProviders = await res.json();
+    updateStats();
+    renderTable();
+  } catch(e) {
+    showToast('Error cargando datos', 'error');
+  }
+}
+
+async function updateField(id, fields) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/proveedores?id=eq.${id}`,
+    {
+      method: 'PATCH',
+      headers: { ...HEADERS, 'Prefer': 'return=representation' },
+      body: JSON.stringify(fields)
+    }
+  );
+  if (!res.ok) throw new Error('Error actualizando');
+  return await res.json();
+}
+
+async function deleteProvider(id) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/proveedores?id=eq.${id}`,
+    { method: 'DELETE', headers: HEADERS }
+  );
+  if (!res.ok) throw new Error('Error eliminando');
+}
+
+// ── STATS ──
+function updateStats() {
+  const pending  = allProviders.filter(p => !p.activo).length;
+  const active   = allProviders.filter(p => p.activo).length;
+  const featured = allProviders.filter(p => p.destacado).length;
+
+  document.getElementById('stat-pending').textContent  = pending;
+  document.getElementById('stat-active').textContent   = active;
+  document.getElementById('stat-featured').textContent = featured;
+  document.getElementById('stat-total').textContent    = allProviders.length;
+  document.getElementById('badge-pending').textContent = pending;
+}
+
+// ── TABS ──
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.getElementById('table-title').textContent =
+    tab === 'pending' ? 'Proveedores pendientes de aprobación' : 'Proveedores activos';
+  document.getElementById('table-search').value = '';
+  renderTable();
+}
+
+// ── TABLE ──
+function renderTable() {
+  const q = document.getElementById('table-search').value.toLowerCase().trim();
+  let list = allProviders.filter(p => currentTab === 'pending' ? !p.activo : p.activo);
+
+  if (q) list = list.filter(p =>
+    p.nombre.toLowerCase().includes(q) ||
+    p.categoria.toLowerCase().includes(q) ||
+    p.pueblo.toLowerCase().includes(q)
+  );
+
+  const body = document.getElementById('table-body');
+
+  if (!list.length) {
+    body.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">${currentTab === 'pending' ? '🎉' : '📭'}</div>
+        <h3>${currentTab === 'pending' ? '¡No hay pendientes!' : 'No hay proveedores activos'}</h3>
+        <p>${currentTab === 'pending' ? 'Todos los registros han sido revisados.' : 'Aprueba registros desde la pestaña Pendientes.'}</p>
+      </div>`;
+    return;
+  }
+
+  body.innerHTML = list.map(p => {
+    const icon = CAT_ICONS[p.categoria_id] || '🛠️';
+    const date = new Date(p.created_at).toLocaleDateString('es-PR', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    return `
+    <div class="provider-row" id="row-${p.id}">
+      <div class="row-avatar">${icon}</div>
+      <div class="row-info">
+        <div class="row-name">${p.nombre}</div>
+        <div class="row-meta">📞 ${p.telefono} · 📅 ${date}</div>
+        ${p.descripcion ? `<div class="row-meta" style="margin-top:2px;font-style:italic">"${p.descripcion.slice(0,60)}${p.descripcion.length>60?'...':''}"</div>` : ''}
+      </div>
+      <div class="row-badges">
+        <span class="badge badge-cat">${p.categoria}</span>
+        <span class="badge badge-pueblo">📍 ${p.pueblo}</span>
+        ${p.activo ? '<span class="badge badge-active">✅ Activo</span>' : '<span class="badge badge-pending">⏳ Pendiente</span>'}
+        ${p.destacado ? '<span class="badge badge-featured">⭐ Destacado</span>' : ''}
+      </div>
+      <div class="row-actions">
+        ${!p.activo ? `
+          <button class="action-btn btn-approve" onclick="approveProvider('${p.id}')">✅ Aprobar</button>
+          <button class="action-btn btn-reject" onclick="confirmDelete('${p.id}', '${p.nombre}')">✕ Rechazar</button>
+        ` : `
+          ${p.destacado
+            ? `<button class="action-btn btn-unfeature" onclick="toggleFeatured('${p.id}', false)">★ Quitar</button>`
+            : `<button class="action-btn btn-feature" onclick="toggleFeatured('${p.id}', true)">☆ Destacar</button>`
+          }
+          <button class="action-btn btn-delete" onclick="confirmDelete('${p.id}', '${p.nombre}')">🗑️</button>
+        `}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── ACTIONS ──
+async function approveProvider(id) {
+  try {
+    await updateField(id, { activo: true });
+    const p = allProviders.find(x => x.id === id);
+    if (p) p.activo = true;
+    updateStats();
+    renderTable();
+    showToast('✅ Proveedor aprobado', 'success');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+async function toggleFeatured(id, val) {
+  try {
+    await updateField(id, { destacado: val });
+    const p = allProviders.find(x => x.id === id);
+    if (p) p.destacado = val;
+    updateStats();
+    renderTable();
+    showToast(val ? '⭐ Marcado como destacado' : 'Destacado removido', 'success');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+function confirmDelete(id, nombre) {
+  document.getElementById('confirm-msg').textContent = `¿Seguro que quieres eliminar a "${nombre}"? Esta acción no se puede deshacer.`;
+  document.getElementById('confirm-yes-btn').onclick = async () => {
+    closeConfirm();
+    try {
+      await deleteProvider(id);
+      allProviders = allProviders.filter(x => x.id !== id);
+      updateStats();
+      renderTable();
+      showToast('🗑️ Proveedor eliminado', 'success');
+    } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  };
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('open');
+}
+
+// ── TOAST ──
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── AUTO REFRESH every 30s ──
+setInterval(() => {
+  if (sessionStorage.getItem('spr_admin')) loadProviders();
+}, 30000);
+
+// ── INIT ──
+if (sessionStorage.getItem('spr_admin')) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-screen').style.display = 'block';
+  loadProviders();
+}
+</script>
+</body>
+</html>
